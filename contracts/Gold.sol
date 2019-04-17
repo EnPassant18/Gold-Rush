@@ -14,32 +14,26 @@ and Lode, our ERC-721 token
  contract Gold is ERC20 {
 
     string public constant contractName = 'Gold';
-    address public contractOwner;
-    address public minter;
- 
+    /*Stores address of the Gold contract instantiating this contract*/
+    address public _GameContract;
+    /* Stores address of a minter address if one is added. */
 
     constructor() public {
-        contractOwner = msg.sender;
+      _GameContract = msg.sender;
     }
 
-    modifier onlyGoldTokenContract() {
-        require(msg.sender == contractOwner, "Caller does not own this contract.");
+    modifier onlyGameContract() {
+        require(msg.sender == _GameContract, "msg.sender is not Game contract.");
         _;
     }
-
-
-  /**
-   * Updates the minter address.
-   * @param newMinter The address of the new minter.
-   */
-  function setMinter(address newMinter) public onlyGoldTokenContract {
-    minter = newMinter;
-  }
-
-
-    //Game will want to be able to mint accounts
-    function mint( address to, uint256 amount) public onlyGoldTokenContract() {
+    
+    //When you want to buy gold, the Game contract mints to a Player address
+    function mint(address to, uint256 amount) public onlyGoldTokenContract {
         _mint(to, amount);
+    }
+    //When you want to remove gold from a player, the Game contract calls burn
+    function burn(address from, uint256 amount) public onlyGoldTokenContract {
+      _burn(from, amount);
     }
 
  }
