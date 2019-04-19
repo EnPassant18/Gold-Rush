@@ -26,14 +26,16 @@ and Lode, our ERC-721 token
         require(msg.sender == _GameContract, "msg.sender is not Game contract.");
         _;
     }
-    
+
     //When you want to buy gold, the Game contract mints to a Player address
-    function mint(address to, uint256 amount) public onlyGoldTokenContract {
+    function giveGold(address to, uint256 amount) public onlyGameContract {
         _mint(to, amount);
     }
     //When you want to remove gold from a player, the Game contract calls burn
-    function burn(address from, uint256 amount) public onlyGoldTokenContract {
+    function takeAwayGold(address from, uint256 amount) public onlyGameContract {
       _burn(from, amount);
     }
+
+
 
  }
