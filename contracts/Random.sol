@@ -1,23 +1,20 @@
 pragma solidity ^0.4.24;
 
+import "./Support/SafeMath.sol";
 
 contract Random {
 
   using SafeMath for uint256;
 
-  uint256 private seed;
+  uint256 private seed = 0;
 
-  /*
-  Generates a random number between 0-100;
-  */
   function random() internal returns(uint256) {
-    uint256 random = uint256(keccak256(block.timestamp, msg.sender, seed)) % 100;
+    uint256 out = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, seed))) % 100;
     seed.add(1);
-
-    return random;
+    return out;
   }
 
-  function generate() external view returns (uint256) {
+  function generate() external returns (uint256) {
     return random();
   }
 }

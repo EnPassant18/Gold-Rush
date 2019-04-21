@@ -1,56 +1,59 @@
 pragma solidity ^0.4.24;
 
+import "./Game.sol";
+import "./Support/SafeMath.sol";
 
-/**
-(The lode will mine automatically and emit events when it yields)
-
-*/
-
-contract Lode is ERC721 {
+contract Lode {
 
   string public constant contractName = "Lode";
 
+  address public owner;
+  uint256 private seed;
+  address public game;
   uint256 constant public RESOURCE_COUNT = 8;
   uint256 public deposit;
-  uint256 public machine;
+  uint256 public equipment;
   uint256 public goldMined;
-  //view the resources mined since last collection.
   uint256[RESOURCE_COUNT] resourcesMined;
 
+  modifier ownerOnly() {
+    require(msg.sender == owner);
+    _;
+  }
 
-  struct Lode {
-    uint256 tokenID;
+  modifier gameOnly() {
+    require(msg.sender == game);
+    _;
+  }
+
+  modifier gameOrOwnerOnly() {
+    require(msg.sender == owner || msg.sender == game);
+    _;
+  }
+
+  constructor(address setOwner, uint256 setSeed) public {
+    game = msg.sender;
+    owner = setOwner;
+    seed = setSeed;
+  }
+
+  function setOwner(address newOwner) public gameOrOwnerOnly {
+    owner = newOwner;
+  }
+
+  function setEquipment(uint256 newEquipment) public ownerOnly {
 
   }
 
-  constructor() {
+  function setDeposit(uint256 newDeposit) public ownerOnly {
 
   }
 
-
-  function newLode(address player, uint256 randomSelector) {
-
-  }
-
-  //setEquipment(uint equipment): Set the mining machine
-  function setEquipment(uint256 equipment) {
+  function stopMining() public ownerOnly {
 
   }
 
-  //setDeposit(uint deposit): Set the deposit being mined
-  function setDeposit(uint256 deposit) {
+  function collect() public ownerOnly returns (uint256, uint256[RESOURCE_COUNT]) {
 
   }
-
-  //stopMining(): set machine and deposit to zero and stop mining
-  function stopMining() {
-
-  }
-
-  //Call a function to collect resources and gold mined */
-  function collect() returns (uint256, uint256[RESOURCE_COUNT]) {
-
-  }
-
-
 }

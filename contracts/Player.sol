@@ -3,36 +3,44 @@ pragma solidity ^0.4.24;
 import "./Lode.sol";
 import "./Gold.sol";
 import "./Game.sol";
+import "./Support/SafeMath.sol";
 
 contract Player {
+
   using SafeMath for uint;
+  string public constant contractName = 'Player';
 
   uint constant public RESOURCE_COUNT = 8;
-  uint constant public MACHINE_COUNT = 14;
-  uint[MACHINE_COUNT][RESOURCE_COUNT] constant public RECIPES; // TODO: initialize
+  uint constant public EQUIPMENT_COUNT = 14;
+  uint[RESOURCE_COUNT][EQUIPMENT_COUNT] public RECIPES;
 
   address public owner;
   Game public game;
   uint public goldBalance;
   Lode[] public lodes; // Array of all Lodes this player owns
   uint[RESOURCE_COUNT] public resources; // Array of the quantities of each resource this player owns
-  uint[MACHINE_COUNT] public machines; // Array of the quantities of each machine this player owns
-  uint[MACHINE_COUNT] public machinesInUse; // Array of the quantities of each machine this player is using
+  uint[EQUIPMENT_COUNT] public equipmentOwned; // Array of the quantities of each equipment this player owns
+  uint[EQUIPMENT_COUNT] public equipmentInUse; // Array of the quantities of each equipment this player is using
 
   modifier ownerOnly() {
     require(msg.sender == owner);
+    _;
   }
 
   constructor(address setOwner) public {
-    game = msg.sender;
+    game = Game(msg.sender);
     owner = setOwner;
   }
 
-  function lodeSetMachine(uint lode, uint machine) public ownerOnly {
-    require(machines[machine].sub(machinesInUse[machine]) > 0);
-    machinesInUse[lodes[lode].machine] = machinesInUse[lodes[lode].machine].sub(1);
-    machinesInUse[machine] = machinesInUse[machine].add(1);
-    lodes[lode].setMachine(machine);
+  function setOwner(address newOwner) public ownerOnly {
+    owner = newOwner;
+  }
+
+  function lodeSetEquipment(uint lode, uint equipment) public ownerOnly {
+    require(equipmentOwned[equipment].sub(equipmentInUse[equipment]) > 0);
+    equipmentInUse[lodes[lode].equipment()] = equipmentInUse[lodes[lode].equipment()].sub(1);
+    equipmentInUse[equipment] = equipmentInUse[equipment].add(1);
+    lodes[lode].setEquipment(equipment);
   }
 
   function lodeSetDeposit(uint lode, uint deposit) public ownerOnly {
@@ -40,12 +48,12 @@ contract Player {
   }
 
   function lodeStopMining(uint lode) public ownerOnly {
-    machinesInUse[lodes[Lode].machine] = machinesInUse[lodes[Lode].machine].sub(1);
-    lode.stopMining();
+    equipmentInUse[lodes[lode].equipment()] = equipmentInUse[lodes[lode].equipment()].sub(1);
+    lodes[lode].stopMining();
   }
 
   function lodeCollect(uint lode) public ownerOnly {
-    (uint goldCollected, uint resourcesCollected) = lodes[lode].collect();
+    (uint goldCollected, uint[RESOURCE_COUNT] memory resourcesCollected) = lodes[lode].collect();
     goldBalance = goldBalance.add(goldCollected);
     for (uint i = 0; i < RESOURCE_COUNT; i++) {
       resources[i] = resources[i].add(resourcesCollected[i]);
@@ -57,7 +65,7 @@ contract Player {
   }
 
   function _removeLode(address lode) private {
-    i = 0;
+    uint i = 0;
     while (true) {
       if (address(lodes[i]) == lode) {
         delete lodes[i];
@@ -69,7 +77,7 @@ contract Player {
   }
 
   function sellLodeComplete(address lode, uint price) public {
-    require(msg.sender == game);
+    require(msg.sender == address(game));
     _removeLode(lode);
     goldBalance = goldBalance.add(price);
   }
@@ -82,19 +90,19 @@ contract Player {
 
   function buyNewLode() public ownerOnly {
     address lode = game.buyNewLode();
-    goldBalance = goldBalance.sub(game.newLodePrice);
+    goldBalance = goldBalance.sub(game.newLodePrice());
     lodes.push(Lode(lode));
   }
 
-  function craft(uint machine) public ownerOnly {
-    uint[RESOURCE_COUNT] recipe = RECIPES[machine];
+  function craft(uint equipment) public ownerOnly {
+    uint[RESOURCE_COUNT] storage recipe = RECIPES[equipment];
     for (uint i = 0; i < RESOURCE_COUNT; i++) {
       resources[i] = resources[i].sub(recipe[i]);
     }
-    machines[machine] = machines[machine].add(1);
+    equipmentOwned[equipment] = equipmentOwned[equipment].add(1);
   }
 
   function buyGold() public payable ownerOnly {
-    goldBalance = goldBalance.add(game.buyGold.call.value(msg.value)());
+    goldBalance = goldBalance.add(game.buyGold.value(msg.value)());
   }
 }
