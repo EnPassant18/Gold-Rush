@@ -129,4 +129,9 @@ contract Game  {
   function setNewGoldPrice(uint256 price) isModerator public {
     goldPrice = price;
   }
+
+  function lodeMint(address miner, uint256 quantity) public {
+    require(lodeRegistration[msg.sender], "Caller must be a valid Lode");
+    GoldContract.mint(miner, quantity);
+  }
 }
