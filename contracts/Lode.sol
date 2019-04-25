@@ -6,7 +6,6 @@ import "./Support/SafeMath.sol";
 contract Lode {
 
   string public constant contractName = "Lode";
-
   address public owner;
   uint256 private seed;
   address public game;
