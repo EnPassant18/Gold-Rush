@@ -9,7 +9,6 @@ contract Lode {
   using SafeMath for uint256;
 
   string public constant contractName = "Lode";
-
   address public owner;
   address public game;
   uint256 constant public RESOURCE_COUNT = 8;

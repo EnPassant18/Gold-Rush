@@ -1,13 +1,13 @@
 const utils = require('./Utils')
 
-const CryptoBears = utils.CryptoBears
-const BearBucks = utils.BearBucks
+const Lode = utils.Lode
+const Gold = utils.Gold
 const checkState = utils.checkState
 const expectRevert = utils.expectRevert
 
 const amount = 100
 
-contract('BearBucksNegativeTests', async function (accounts) {
+contract('GoldNegativeTests', async function (accounts) {
 
   // This runs before each test.
   beforeEach('Make fresh contract', async function () {
@@ -34,11 +34,6 @@ contract('BearBucksNegativeTests', async function (accounts) {
     ]
     await checkState([bearBucks], [stateChanges], accounts)
   })
-
-  it('should fail to placeBet if not CryptoBearsContract', async function () {
-    await bearBucks.mint(accounts[0], amount, {from: accounts[5]})
-    await bearBucks.approve(accounts[5], amount, {from: accounts[0]})
-    await expectRevert(bearBucks.placeBet(accounts[0], amount, {from: accounts[3]}))
 
     let stateChanges = [
       {'var': 'totalSupply', 'expect': amount},
