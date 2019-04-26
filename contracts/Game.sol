@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 
 import "./Player.sol";
 import "./Gold.sol";
-import "./Random.sol";
 import "./Lode.sol";
 import "./Support/SafeMath.sol";
 
@@ -17,7 +16,6 @@ contract Game  {
   mapping(address => bool) private registration;
   mapping(address => bool) private lodeRegistration;
   Gold private GoldContract;
-  Random private RandomGenerator;
 
   struct LodeForSale {
     uint256 price;
@@ -44,7 +42,6 @@ contract Game  {
       require(setModerator != address(0));
       require(setWallet != address(0));
       GoldContract = new Gold();
-      RandomGenerator = new Random();
       goldPrice = setGoldPrice;
       newLodePrice = setLodePrice;
       moderator = setModerator;
@@ -67,12 +64,12 @@ contract Game  {
   }
 
   /**
-  * Sells a new random Lode in exchange for Gold at the newLodePrice.
+  * Sells a new Lode in exchange for Gold at the newLodePrice.
   * Returns the address of the Lode.
   */
   function buyNewLode() public isRegistered returns(address) {
     GoldContract.burn(msg.sender, newLodePrice);
-    address newLodeAddress = address(new Lode(msg.sender, RandomGenerator.generate()));
+    address newLodeAddress = address(new Lode(msg.sender));
     lodeRegistration[newLodeAddress] = true;
     return newLodeAddress;
   }

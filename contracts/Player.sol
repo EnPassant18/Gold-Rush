@@ -37,6 +37,7 @@ contract Player {
   }
 
   function lodeSetEquipment(uint lode, uint equipment) public ownerOnly {
+    lodeCollect(lode);
     require(equipmentOwned[equipment].sub(equipmentInUse[equipment]) > 0);
     equipmentInUse[lodes[lode].equipment()] = equipmentInUse[lodes[lode].equipment()].sub(1);
     equipmentInUse[equipment] = equipmentInUse[equipment].add(1);
@@ -44,7 +45,19 @@ contract Player {
   }
 
   function lodeSetDeposit(uint lode, uint deposit) public ownerOnly {
+    lodeCollect(lode);
     lodes[lode].setDeposit(deposit);
+  }
+
+  function lodeSetDepositAndEquipment(uint lode, uint equipment, uint deposit) public ownerOnly {
+    lodeCollect(lode);
+    if (deposit < lodes[lode].deposit()) {
+      lodeSetDeposit(lode, deposit);
+      lodeSetEquipment(lode, equipment);
+    } else {
+      lodeSetEquipment(lode, equipment);
+      lodeSetDeposit(lode, deposit);
+    }
   }
 
   function lodeStopMining(uint lode) public ownerOnly {
@@ -54,6 +67,7 @@ contract Player {
 
   function lodeCollect(uint lode) public ownerOnly {
     (uint goldCollected, uint[RESOURCE_COUNT] memory resourcesCollected) = lodes[lode].collect();
+    if (goldBalance == 0) return;
     goldBalance = goldBalance.add(goldCollected);
     for (uint i = 0; i < RESOURCE_COUNT; i++) {
       resources[i] = resources[i].add(resourcesCollected[i]);

@@ -1,30 +1,35 @@
 pragma solidity ^0.4.24;
 
 import "./Game.sol";
+import "./Random.sol";
 import "./Support/SafeMath.sol";
 
 contract Lode {
 
+  using SafeMath for uint256;
+
   string public constant contractName = "Lode";
 
   address public owner;
-  uint256 private seed;
   address public game;
   uint256 constant public RESOURCE_COUNT = 8;
   uint256 constant public EQUIPMENT_COUNT = 14;
   uint256 constant public DEPOSIT_COUNT = 4;
+  uint256[DEPOSIT_COUNT] public yieldsPerDeposit = [250, 500, 1000, 150];
+  uint256[DEPOSIT_COUNT][RESOURCE_COUNT] distributions; // Each row must sum to 2^256
   uint256 public deposit = 0; // Zero means we're not mining
-  uint256 public equipment = 0; // Zero means we're not mining
-  bool private uncovered = false;
-  uint256 private uncoveredTracker = 0;
+  uint256 public equipment = 0; // Zero represents topsoil
+  uint256 public lastCollect; // Block when collect was last called
+  Random private random;
+
+  struct Equipment {
+    uint256 maxDeposit;
+    uint256 blocksPerYield;
+  }
+  Equipment[EQUIPMENT_COUNT] allEquipment;
 
   modifier ownerOnly() {
     require(msg.sender == owner);
-    _;
-  }
-
-  modifier gameOnly() {
-    require(msg.sender == game);
     _;
   }
 
@@ -33,10 +38,10 @@ contract Lode {
     _;
   }
 
-  constructor(address setOwner, uint256 setSeed) public {
+  constructor(address setOwner) public {
     game = msg.sender;
     owner = setOwner;
-    seed = setSeed;
+    random = new Random();
   }
 
   function setOwner(address newOwner) public gameOrOwnerOnly {
@@ -44,51 +49,47 @@ contract Lode {
   }
 
   function setEquipment(uint256 newEquipment) public ownerOnly {
-    require(newEquipment > 0, "Setting equipment to 0 will halt the mining.");
     require(newEquipment <= EQUIPMENT_COUNT, "Invalid equipment ID");
+    require(lastCollect == block.number, "You must collect before changing equipment");
+    require(allEquipment[newEquipment].maxDeposit >= deposit, "Invalid equipment for current target deposit");
     equipment = newEquipment;
   }
 
   function setDeposit(uint256 newDeposit) public ownerOnly {
-    require(newDeposit > 0, "Setting deposit to 0 will halt the mining.");
-    require(newDeposit <= DEPOSIT_COUNT, "Invalid deposit ID");
-    //make sure deposit is not buried
-    //using simple arithmetic to keep track of prior lode
-    if !uncovered:
-      if newDeposit == 1:
-        uncoveredTracker.add(newDeposit);
-      else if newDeposit == 2:
-        require(uncoveredTracker == 1, "To mine for Subsoil [id: 2], you need to mine for Topsoil[id:1].")
-        uncoveredTracker.add(newDeposit);
-      else if newDeposit == 3:
-          require(uncoveredTracker == 3, "To mine for BedRock, you need to mine for Topsoil[id:1] and Subsoil [id: 2] first.")
-          uncoveredTracker.add(newDeposit);
-      else:
-          require(uncoveredTracker == 6, "To mine for Ancient Alient Ruins, you need to mine for BedRock, Subsoil, and Topsoil.")
-          uncovered = true;
-
+    require(newDeposit < DEPOSIT_COUNT, "Invalid deposit ID");
+    require(lastCollect == block.number, "You must collect before changing deposit");
+    require(allEquipment[equipment].maxDeposit >= newDeposit, "Invalid target deposit for current equipment");
     deposit = newDeposit;
-
   }
 
   function stopMining() public ownerOnly {
+    require(lastCollect == block.number, "You must collect before halting");
     equipment = 0;
-    deposit = 0;
-    uncovered = false;
-    uncoveredTracker = 0;
   }
 
-  /*
-  The equipment has to be able to mine that deposit
-  And the deposit must not be buried */
   function collect() public ownerOnly returns (uint256, uint256[RESOURCE_COUNT]) {
-    require(deposit > 0, "This Lode is not mining because no deposit is set."");
-    require(equipment > 0, "This Lode is not mining because no equipment is set.");
-
-    //return
-    // TODO: figure out how many yields occurred since last call,
-    // calculate the gold and resources mined, and return them.
-    // Also call Game(game).lodeMint(owner, quantity) with the quantity of Gold mined
-    // to mint new gold and give it to the player.
+    uint256[RESOURCE_COUNT] memory resourcesMined;
+    if (equipment == 0) {
+      lastCollect = block.number;
+      return (0, resourcesMined);
+    }
+    uint256 yields = block.number.sub(lastCollect).div(allEquipment[equipment].blocksPerYield);
+    if (yields > yieldsPerDeposit[deposit]) {
+      yields = yieldsPerDeposit[deposit];
+    }
+    yieldsPerDeposit[deposit] = yieldsPerDeposit[deposit].sub(yields);
+    lastCollect = block.number;
+    Game(game).lodeMint(owner, yields);
+    for (uint256 i = 0; i < yields; i++) {
+      uint256 randomValue = random.random();
+      for (uint256 resource = 0; resource < RESOURCE_COUNT; resource++) {
+        if (randomValue < distributions[deposit][resource]) {
+          resourcesMined[resource] = resourcesMined[resource].add(1);
+          break;
+        }
+        randomValue = randomValue.sub(distributions[deposit][resource]);
+      }
+    }
+    return (yields, resourcesMined);
   }
 }
