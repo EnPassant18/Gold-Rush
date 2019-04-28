@@ -69,49 +69,6 @@ contract('GoldNegativeTests', async function (accounts) {
     await checkState([bearBucks], [stateChanges], accounts)
   })
 
-  it('should fail to placeBet if betSum would be greater than balance', async function () {
-    await bearBucks.mint(accounts[0], amount, {from: accounts[5]})
-    await bearBucks.approve(accounts[5], amount+1, {from: accounts[0]})
-    await bearBucks.placeBet(accounts[0], amount, {from: accounts[5]})
-    await expectRevert(bearBucks.placeBet(accounts[0], 1, {from: accounts[5]}))
 
-    let stateChanges = [
-      {'var': 'totalSupply', 'expect': amount},
-      {'var': 'balanceOf.a0', 'expect': amount},
-      {'var': 'allowance.a0.cb', 'expect': amount+1},
-      {'var': 'betSum.a0', 'expect': amount}
-    ]
-    await checkState([bearBucks], [stateChanges], accounts)
-  })
-
-  it('should fail to removeBet if not CryptoBearsContract', async function () {
-    await bearBucks.mint(accounts[0], amount, {from: accounts[5]})
-    await bearBucks.approve(accounts[5], amount, {from: accounts[0]})
-    await bearBucks.placeBet(accounts[0], amount, {from: accounts[5]})
-    await expectRevert(bearBucks.removeBet(accounts[0], amount, {from: accounts[3]}))
-
-    let stateChanges = [
-      {'var': 'totalSupply', 'expect': amount},
-      {'var': 'balanceOf.a0', 'expect': amount},
-      {'var': 'allowance.a0.cb', 'expect': amount},
-      {'var': 'betSum.a0', 'expect': amount}
-    ]
-    await checkState([bearBucks], [stateChanges], accounts)
-  })
-
-  it('should fail to approve amount less than betSum for CryptoBearsContract', async function () {
-    await bearBucks.mint(accounts[0], amount, {from: accounts[5]})
-    await bearBucks.approve(accounts[5], amount, {from: accounts[0]})
-    await bearBucks.placeBet(accounts[0], amount, {from: accounts[5]})
-    await expectRevert(bearBucks.approve(accounts[5], amount-1, {from: accounts[0]}))
-
-    let stateChanges = [
-      {'var': 'totalSupply', 'expect': amount},
-      {'var': 'balanceOf.a0', 'expect': amount},
-      {'var': 'allowance.a0.cb', 'expect': amount},
-      {'var': 'betSum.a0', 'expect': amount}
-    ]
-    await checkState([bearBucks], [stateChanges], accounts)
-  })
 
 })

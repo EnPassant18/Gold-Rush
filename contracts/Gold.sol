@@ -16,14 +16,14 @@ and Lode, our ERC-721 token
 
     string public constant contractName = 'Gold';
 
-    address public GameContract;
+    address public _GameContract;
 
     constructor() public {
-      GameContract = msg.sender;
+      _GameContract = msg.sender;
     }
 
     modifier onlyGameContract() {
-      require(msg.sender == GameContract, "Caller is not Game contract");
+      require(msg.sender == _GameContract, "Caller is not Game contract");
       _;
     }
 

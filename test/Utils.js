@@ -1,7 +1,7 @@
-const CryptoBears = artifacts.require('CryptoBears')
-const BearBucks = artifacts.require('BearBucks')
-const BearCrowdsale = artifacts.require('BearCrowdsale')
-const ReentrancyExploit = artifacts.require('ReentrancyExploit')
+const Lode = artifacts.require('Lode')
+const Gold = artifacts.require('Gold')
+const Game = artifacts.require('Game')
+const Player = artifacts.require('Player')
 
 const web3Utils = require('web3-utils')
 const assertDiff = require('assert-diff')
@@ -54,29 +54,25 @@ async function checkState(_tokens, _stateChanges, _accounts) {
 async function expectedState(token, stateChanges, accounts, name) {
   let state = {}
   switch (name) {
-    case 'BearBucks':
+    case 'Gold':
     state = {
       'totalSupply': 0,
       'balanceOf': {
         'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0, 'a4': 0, 'a5': 0, 'a6': 0, 'a7': 0
       },
-      'allowance': {
-        'a0': {
-          'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0, 'a4': 0, 'cb': 0},
-        'a1': {'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0, 'a4': 0, 'cb': 0},
-        'a2': {'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0, 'a4': 0, 'cb': 0},
-        'a3': {'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0, 'a4': 0, 'cb': 0},
-        'a4': {'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0, 'a4': 0, 'cb': 0},
-      },
-      'betSum': {'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0, 'a4': 0},
       'minter': zero40
     }
     break
-    case 'CryptoBears':
+    case 'Lode':
     state = {
+      'totalSupply': 0,
       'balanceOf': {
         'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0, 'a4': 0, 'a5': 0, 'a6': 0, 'a7': 0
       },
+      'minter': zero40,
+      'lastCollect': zero40
+
+
       'ownerOf': {'b0': zero40, 'b1': zero40, 'b2': zero40, 'b3': zero40, 'b4': zero40},
       'getApproved': {'b0': zero40, 'b1': zero40, 'b2': zero40, 'b3': zero40, 'b4': zero40},
       'isApprovedForAll': {
@@ -86,50 +82,53 @@ async function expectedState(token, stateChanges, accounts, name) {
         'a3': {'a0': false, 'a1': false, 'a2': false, 'a3': false, 'a4': false},
         'a4': {'a0': false, 'a1': false, 'a2': false, 'a3': false, 'a4': false},
       },
-      'bets': {
-        'b0': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
-        'b1': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
-        'b2': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
-        'b3': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
-        'b4': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
-      },
-      'commitments': {
-        'b0': {'b0': zero64, 'b1': zero64, 'b2': zero64, 'b3': zero64, 'b4': zero64},
-        'b1': {'b0': zero64, 'b1': zero64, 'b2': zero64, 'b3': zero64, 'b4': zero64},
-        'b2': {'b0': zero64, 'b1': zero64, 'b2': zero64, 'b3': zero64, 'b4': zero64},
-        'b3': {'b0': zero64, 'b1': zero64, 'b2': zero64, 'b3': zero64, 'b4': zero64},
-        'b4': {'b0': zero64, 'b1': zero64, 'b2': zero64, 'b3': zero64, 'b4': zero64},
-      },
-      'committed': {
-        'b0': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
-        'b1': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
-        'b2': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
-        'b3': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
-        'b4': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
-      },
-      'secrets': {
-        'b0': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
-        'b1': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
-        'b2': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
-        'b3': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
-        'b4': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
-      },
-      'revealed': {
-        'b0': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
-        'b1': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
-        'b2': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
-        'b3': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
-        'b4': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
-      },
-      'timeLastFed': {
-        'b0': await getTimeOfBirthOrZero(token, 0),
-        'b1': await getTimeOfBirthOrZero(token, 1),
-        'b2': await getTimeOfBirthOrZero(token, 2),
-        'b3': await getTimeOfBirthOrZero(token, 3),
-        'b4': await getTimeOfBirthOrZero(token, 4),
-      },
-      'minter': accounts[5],
-    }
+
+
+    //basically set all the initial values
+    //   'bets': {
+    //     'b0': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
+    //     'b1': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
+    //     'b2': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
+    //     'b3': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
+    //     'b4': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
+    //   },
+    //   'commitments': {
+    //     'b0': {'b0': zero64, 'b1': zero64, 'b2': zero64, 'b3': zero64, 'b4': zero64},
+    //     'b1': {'b0': zero64, 'b1': zero64, 'b2': zero64, 'b3': zero64, 'b4': zero64},
+    //     'b2': {'b0': zero64, 'b1': zero64, 'b2': zero64, 'b3': zero64, 'b4': zero64},
+    //     'b3': {'b0': zero64, 'b1': zero64, 'b2': zero64, 'b3': zero64, 'b4': zero64},
+    //     'b4': {'b0': zero64, 'b1': zero64, 'b2': zero64, 'b3': zero64, 'b4': zero64},
+    //   },
+    //   'committed': {
+    //     'b0': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
+    //     'b1': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
+    //     'b2': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
+    //     'b3': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
+    //     'b4': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
+    //   },
+    //   'secrets': {
+    //     'b0': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
+    //     'b1': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
+    //     'b2': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
+    //     'b3': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
+    //     'b4': {'b0': 0, 'b1': 0, 'b2': 0, 'b3': 0, 'b4': 0},
+    //   },
+    //   'revealed': {
+    //     'b0': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
+    //     'b1': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
+    //     'b2': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
+    //     'b3': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
+    //     'b4': {'b0': false, 'b1': false, 'b2': false, 'b3': false, 'b4': false},
+    //   },
+    //   'timeLastFed': {
+    //     'b0': await getTimeOfBirthOrZero(token, 0),
+    //     'b1': await getTimeOfBirthOrZero(token, 1),
+    //     'b2': await getTimeOfBirthOrZero(token, 2),
+    //     'b3': await getTimeOfBirthOrZero(token, 3),
+    //     'b4': await getTimeOfBirthOrZero(token, 4),
+    //   },
+    //   'minter': accounts[5],
+    // }
     break
     case 'BearCrowdsale':
     state = {
@@ -494,7 +493,7 @@ function generateHash(r) {
 function calculateWinner(lastToReveal, firstToReveal, r1, r2) {
   let flip_result = ((r1 ^ r2) % 2) == 1
   if (flip_result) {
-    return [lastToReveal, firstToReveal] // winner is at index 0. 
+    return [lastToReveal, firstToReveal] // winner is at index 0.
   } else {
     return [firstToReveal, lastToReveal]
   }
