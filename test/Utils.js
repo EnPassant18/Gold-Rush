@@ -1,3 +1,9 @@
+const assertDiff = require('assert-diff')
+assertDiff.options.strict = true
+
+const zero40 = "0x0000000000000000000000000000000000000000"
+const zero64 = "0x0000000000000000000000000000000000000000000000000000000000000000"
+
 /*
 const CryptoBears = artifacts.require('CryptoBears')
 const BearBucks = artifacts.require('BearBucks')
@@ -5,8 +11,6 @@ const BearCrowdsale = artifacts.require('BearCrowdsale')
 const ReentrancyExploit = artifacts.require('ReentrancyExploit')
 
 const web3Utils = require('web3-utils')
-const assertDiff = require('assert-diff')
-assertDiff.options.strict = true
 const BigNumber = require('bignumber.js')
 const _ = require('lodash')
 const mapValuesDeep = (v, callback) => (
@@ -14,24 +18,8 @@ const mapValuesDeep = (v, callback) => (
     ? _.mapValues(v, v => mapValuesDeep(v, callback))
     : callback(v)
 )
-const zero40 = "0x0000000000000000000000000000000000000000"
-const zero64 = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
 let accountBalances = {}
-
-// Checks whether an event was properly emmitted.
-function checkEvent(type, event, params) {
-  let eventFound = false
-  event.logs.forEach((o) => {
-    if (o.event === type) {
-      eventFound = true
-      assertDiff.deepEqual(Object.values(o.args), params)
-    }
-  })
-  if (!eventFound) {
-    throw new Error('The specified event was not emmitted: ' + type)
-  }
-}
 
 // Checks for differences between expected and actual states of contract.
 async function checkState(_tokens, _stateChanges, _accounts) {
@@ -489,8 +477,6 @@ module.exports = {
   BearCrowdsale: BearCrowdsale,
   checkState: checkState,
   expectRevert: expectRevert,
-  zero40: zero40,
-  zero64: zero64,
   pause: pause,
   checkEvent: checkEvent,
   getExpectedBalanceDelta: getExpectedBalanceDelta,
@@ -517,6 +503,22 @@ async function expectRevert(contractPromise) {
   assert.fail('Expected error of type revert, but no error was received');
 }
 
+function checkEvent(type, event, params) {
+  let eventFound = false
+  event.logs.forEach((o) => {
+    if (o.event === type) {
+      eventFound = true
+      assertDiff.deepEqual(Object.values(o.args), params)
+    }
+  })
+  if (!eventFound) {
+    throw new Error('The specified event was not emmitted: ' + type)
+  }
+}
+
 module.exports = {
-  expectRevert: expectRevert
+  expectRevert: expectRevert,
+  checkEvent: checkEvent,
+  zero40: zero40,
+  zero64: zero64
 }

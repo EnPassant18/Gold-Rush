@@ -14,15 +14,13 @@ contract('GoldNegativeTests', async function (accounts) {
 
   it('should fail to mint if not Game', async function () {
     await expectRevert(gold.mint(accounts[0], amount, {from: accounts[2]}))
-    let balance = await gold.balanceOf.call(accounts[0])
-    assert.equal(balance, 0)
+    assert.equal((await gold.balanceOf(accounts[0])).toNumber(), 0)
   })
 
   it('should fail to burn if not Game', async function () {
     await gold.mint(accounts[0], amount, {from: accounts[5]})
     await expectRevert(gold.burn(accounts[0], amount, {from: accounts[2]}))
-    let balance = await gold.balanceOf.call(accounts[0])
-    assert.equal(balance, amount)
+    assert.equal((await gold.balanceOf(accounts[0])).toNumber(), amount)
   })
 
 })
