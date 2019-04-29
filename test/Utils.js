@@ -1,3 +1,4 @@
+/*
 const CryptoBears = artifacts.require('CryptoBears')
 const BearBucks = artifacts.require('BearBucks')
 const BearCrowdsale = artifacts.require('BearCrowdsale')
@@ -166,10 +167,6 @@ async function actualState(token, state, accounts, name) {
     case 'BearBucks':
     let cbAddress = await token._CryptoBearsContract.call()
     values = [
-      /**
-       * We use .call() when just trying to read a value without modifying
-       * contract state.
-       */
       (await token.totalSupply.call()).toNumber(),
       (await token.balanceOf.call(accounts[0])).toNumber(),
       (await token.balanceOf.call(accounts[1])).toNumber(),
@@ -450,20 +447,6 @@ async function checkBalancesSumToTotalSupply(token, accounts, name) {
     'total supply does not equal sum of balances for ' + name)
 }
 
-// Used for negative tests.
-async function expectRevert(contractPromise) {
-  try {
-    await contractPromise;
-  } catch (error) {
-    assert(
-      error.message.search('revert') >= 0,
-      'Expected error of type revert, got \'' + error + '\' instead',
-    );
-    return;
-  }
-  assert.fail('Expected error of type revert, but no error was received');
-}
-
 function getExpectedBalanceDelta(gas_used, wei_used) {
   return gas_used.times(new BigNumber(100000000000)).plus((new BigNumber(wei_used)))
 }
@@ -494,7 +477,7 @@ function generateHash(r) {
 function calculateWinner(lastToReveal, firstToReveal, r1, r2) {
   let flip_result = ((r1 ^ r2) % 2) == 1
   if (flip_result) {
-    return [lastToReveal, firstToReveal] // winner is at index 0. 
+    return [lastToReveal, firstToReveal] // winner is at index 0.
   } else {
     return [firstToReveal, lastToReveal]
   }
@@ -517,4 +500,23 @@ module.exports = {
   generateSecret: generateSecret,
   generateHash: generateHash,
   calculateWinner: calculateWinner,
+}
+
+*/
+
+async function expectRevert(contractPromise) {
+  try {
+    await contractPromise;
+  } catch (error) {
+    assert(
+      error.message.search('revert') >= 0,
+      'Expected error of type revert, got \'' + error + '\' instead',
+    );
+    return;
+  }
+  assert.fail('Expected error of type revert, but no error was received');
+}
+
+module.exports = {
+  expectRevert: expectRevert
 }
