@@ -22,6 +22,8 @@ contract Player {
   uint[EQUIPMENT_COUNT] public equipmentOwned; // Array of the quantities of each equipment this player owns
   uint[EQUIPMENT_COUNT] public equipmentInUse; // Array of the quantities of each equipment this player is using
 
+  event Log(uint value);
+
   modifier ownerOnly() {
     require(msg.sender == owner);
     _;
@@ -34,6 +36,10 @@ contract Player {
 
   function setOwner(address newOwner) public ownerOnly {
     owner = newOwner;
+  }
+
+  function lodesOwned() public view returns(uint) {
+    return lodes.length;
   }
 
   function lodeSetEquipment(uint lode, uint equipment) public ownerOnly {
@@ -87,6 +93,7 @@ contract Player {
       }
       i++;
     }
+    lodes.length = lodes.length.sub(1);
     // TODO: move elements after deletion
   }
 
@@ -119,4 +126,6 @@ contract Player {
   function buyGold() public payable ownerOnly {
     goldBalance = goldBalance.add(game.buyGold.value(msg.value)());
   }
+
+  function () public payable {}
 }

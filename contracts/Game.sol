@@ -10,12 +10,12 @@ contract Game  {
   using SafeMath for uint256;
   string public constant contractName = 'Game';
 
-  address private moderator;
-  address private wallet;
-  uint256 private weiCollected;
-  mapping(address => bool) private registration;
-  mapping(address => bool) private lodeRegistration;
-  Gold private GoldContract;
+  address public moderator;
+  address public wallet;
+  uint256 public weiCollected;
+  mapping(address => bool) public registration;
+  mapping(address => bool) public lodeRegistration;
+  Gold public GoldContract;
 
   struct LodeForSale {
     uint256 price;
@@ -25,6 +25,9 @@ contract Game  {
   uint256 public goldPrice; // in Wei
   uint256 public newLodePrice; // in Gold
   mapping(address => LodeForSale) public lodesForSale;
+
+  event Register(address player);
+  event Log(uint value);
 
   modifier isModerator() {
     require(msg.sender == moderator, "Caller must be the moderator");
@@ -51,9 +54,9 @@ contract Game  {
   // Instantiates a new Player and registers it.
   // Sets the caller as the Player's owner. Returns the address of the Player.
   function register() public returns(address) {
-      Player player = new Player(msg.sender);
-      address playerAddress = address(player);
+      address playerAddress = new Player(msg.sender);
       registration[playerAddress] = true;
+      emit Register(playerAddress);
       return playerAddress;
   }
 
@@ -84,7 +87,6 @@ contract Game  {
     uint256 change = msg.value.mod(goldPrice);
     uint256 weiSpent = msg.value - change;
     weiCollected = weiCollected.add(weiSpent);
-    wallet.transfer(weiSpent);
     msg.sender.transfer(change);
     return goldBought;
   }
@@ -110,6 +112,7 @@ contract Game  {
     address buyer = msg.sender;
     uint256 price = lodesForSale[lode].price;
     require(seller != address(0), "Lode must be for sale");
+    delete lodesForSale[lode];
     GoldContract.burn(buyer, price);
     GoldContract.mint(seller, price);
     Lode(lode).setOwner(buyer);
@@ -119,11 +122,13 @@ contract Game  {
 
   // Changes the new Lode price
   function setNewLodePrice(uint256 price) isModerator public {
+    require(price > 0);
     newLodePrice = price;
   }
 
   // Changes the Gold price
   function setNewGoldPrice(uint256 price) isModerator public {
+    require(price > 0);
     goldPrice = price;
   }
 
