@@ -35,6 +35,7 @@ contract Player {
   }
 
   function setOwner(address newOwner) public ownerOnly {
+    require(newOwner != address(0));
     owner = newOwner;
   }
 

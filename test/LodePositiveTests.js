@@ -19,8 +19,4 @@ contract('LodePositiveTests', async function(accounts) {
     });
   })
 
-
-
-
-
 })
