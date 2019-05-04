@@ -85,7 +85,7 @@ contract Game  {
     uint256 goldBought = msg.value.div(goldPrice);
     GoldContract.mint(msg.sender, goldBought);
     uint256 change = msg.value.mod(goldPrice);
-    uint256 weiSpent = msg.value - change;
+    uint256 weiSpent = msg.value.sub(change);
     weiCollected = weiCollected.add(weiSpent);
     msg.sender.transfer(change);
     return goldBought;

@@ -1,14 +1,7 @@
-const utils = require('./Utils')
-const BigNumber = require('bignumber.js')
-
 const Game = artifacts.require('Game')
 const Gold = artifacts.require('Gold')
 const Player = artifacts.require('Player')
 const Lode = artifacts.require('Lode')
-const checkEvent = utils.checkEvent
-const zero40 = utils.zero40
-
-const amount = 100
 
 contract('PlayerPositiveTests', async function (accounts) {
 
