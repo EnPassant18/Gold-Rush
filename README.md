@@ -14,6 +14,7 @@ Our code can be run in the same way as CryptoBears:
 -- Make two terminal tabs; in each, move into the Gold Rush directory and run 'export PATH=$(npm bin):$PATH'
 -- In one tab, run 'ganache-cli -l 8000000' (the argument '-l 8000000' is necessary because otherwise the test suite may run out of gas)
 -- In the other tab, run our test suite with ‘truffle test’
+-- Note that a few tests take a minute or two to run
 -- Note that there are random elements in our app, so the test suite may fail with some very low probability; if this happens, just run the test suite again
 
                                      Overview
