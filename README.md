@@ -1,3 +1,20 @@
+CS1951L Final Project: Gold Rush
+Group Members: 
+Daniel Kostovetsky (dkostove)
+Jide Omekam (jomekam)
+Angela Zhuo (azhuo)
+
+
+                                    Setting Up
+
+Running the code follows similar practice that we learned to program SmartContracts with the truffle package. 
+
+on two separate terminals,  do the following: 
+
+-- run npm install followed by export PATH=$(npm bin):$PATH
+-- Before running the test suite, you must first spin up a private blockchain on your computer with ganache. To do this, open a new terminal tab and run the command ‘ganache-cli.’ 
+--Now that you have ganache up and r
+--Now that you have ganache up and running, you can run the test suite with by opening up a new terminal and running: ‘truffle test’.
                                      Overview
 Decentralized App (DApp)
 GoldRush is a game similar to Cookie Clicker, except instead of cookies, the objective is to obtain as much Gold as possible
