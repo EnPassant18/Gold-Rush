@@ -27,7 +27,6 @@ contract Game  {
   mapping(address => LodeForSale) public lodesForSale;
 
   event Register(address player);
-  event Log(uint value);
 
   modifier isModerator() {
     require(msg.sender == moderator, "Caller must be the moderator");
@@ -132,6 +131,7 @@ contract Game  {
     goldPrice = price;
   }
 
+  // Allows Lodes to create new Gold when a player has mined it
   function lodeMint(address miner, uint256 quantity) public {
     require(lodeRegistration[msg.sender], "Caller must be a valid Lode");
     GoldContract.mint(miner, quantity);

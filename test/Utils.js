@@ -30,9 +30,20 @@ function checkEvent(type, event, params) {
   }
 }
 
+function fastForward(blocks) {
+  for (let i = 0; i < blocks; i++) {
+    web3.currentProvider.sendAsync({
+      jsonrpc: "2.0",
+      method: "evm_mine",
+      id: 12345
+    }, (err, result) => {})
+  }
+}
+
 module.exports = {
   expectRevert: expectRevert,
   checkEvent: checkEvent,
   zero40: zero40,
-  zero64: zero64
+  zero64: zero64,
+  fastForward: fastForward
 }
